@@ -33,6 +33,28 @@ int consultar_cpf(struct Funcionario f[], int cont, const char cpf[])
 	return -1;
 }
 
+int consultar_codigo(struct Pesquisa p[], int cont, const char codigo[])
+{
+	for(int i=0; i<cont; i++){
+		if(strcmp(p[i].codigo, codigo)==0){
+			return i;
+		}
+	}
+	return -1;
+}
+
+
+
+int consultar_codigo_pesquisa(struct RespostaPesquisa rp[], int cont, const char codigo_pesqisa[]){
+	for(int i=0; i<cont; i++){
+		if(strcmp(rp[i].codigoPesquisa, codigo_pesqisa)==0){
+			return i;
+		}
+	}
+	return -1;
+}
+
+
 int inserir_funcionario(struct Funcionario **f, int *cont, int *capacidade)
 {
 	if(*cont>=*capacidade){
@@ -43,29 +65,29 @@ int inserir_funcionario(struct Funcionario **f, int *cont, int *capacidade)
 			return 0;
 		}
 	}
-		char cpf[15];
-		printf("\nEntre com o seu CPF: ");
-		fgets(cpf, sizeof(cpf), stdin);
-		cpf[strcspn(cpf, "\n")] = '\0';
+	char cpf[15];
+	printf("\nEntre com o seu CPF: ");
+	fgets(cpf, sizeof(cpf), stdin);
+	cpf[strcspn(cpf, "\n")] = '\0';
 
-		int k =consultar_cpf(*f, *cont, cpf);
-		if(k==-1){
+	int k =consultar_cpf(*f, *cont, cpf);
+	if(k==-1){
 			
-			printf("\nEntre com o seu nome: ");
-			fgets((*f)[*cont].nome, sizeof((*f)[*cont].nome), stdin);
-			(*f)[*cont].nome[strcspn((*f)[*cont].nome, "\n")] = '\0';
-			strcpy((*f)[*cont].cpf, cpf);
-			printf("\nEntre com o seu cargo: ");
-			fgets((*f)[*cont].cargo, sizeof((*f)[*cont].cargo), stdin);
-			(*f)[*cont].cargo[strcspn((*f)[*cont].cargo, "\n")] = '\0';
-			printf("\nEntre com o número de dependentes: ");
-			scanf("%d", &(*f)[*cont].dependentes);
-			getchar();
-			printf("\nEntre com o salário-base: ");
-			scanf("%f", &(*f)[*cont].salario);
-			getchar();
-			(*cont)++;
-			return 1;
+		printf("\nEntre com o seu nome: ");
+		fgets((*f)[*cont].nome, sizeof((*f)[*cont].nome), stdin);
+		(*f)[*cont].nome[strcspn((*f)[*cont].nome, "\n")] = '\0';
+		strcpy((*f)[*cont].cpf, cpf);
+		printf("\nEntre com o seu cargo: ");
+		fgets((*f)[*cont].cargo, sizeof((*f)[*cont].cargo), stdin);
+		(*f)[*cont].cargo[strcspn((*f)[*cont].cargo, "\n")] = '\0';
+		printf("\nEntre com o número de dependentes: ");
+		scanf("%d", &(*f)[*cont].dependentes);
+		getchar();
+		printf("\nEntre com o salário-base: ");
+		scanf("%f", &(*f)[*cont].salario);
+		getchar();
+		(*cont)++;
+		return 1;
 		}
 	return 0;
 }
@@ -139,6 +161,82 @@ int alterar_funcionario(struct Funcionario f[], int cont, const char cpf[])
 	}
 }
 
+int inserir_pesquisa( struct Pesquisa **p, int *cont, int *capacidade){
+	if(*cont>=*capacidade){
+		*p = realloc(*p, (*capacidade) * sizeof(struct Pesquisa));
+		if(*p==NULL){
+			printf("\nERRO AO ALOCAR MEMÓRIA");
+			return 0;
+		}
+	}
+	char codigo[10];
+	printf("\nEntre com o código da pesquisa: ");
+	fgets(codigo, sizeof(codigo), stdin);
+	codigo[strcspn(codigo, "\n")] = '\0';
+
+	int k = consultar_codigo(*p, *cont, codigo);
+	if(k==-1){
+		printf("\nEntre com a descrição da pesquisa: ");
+		fgets((*p)[*cont].descricao, sizeof((*p)[*cont].descricao), stdin);
+		strcpy((*p)[*cont].codigo, codigo);
+		(*cont)++;
+		return 1;
+	}
+	return 0;
+}
+
+int consultar_pesquisa(struct Pesquisa p[], int cont, char codigo[])
+{
+	int k = consultar_codigo(p, cont, codigo);
+	if(k!=-1)
+	{
+		printf("\nDescrição: %s", p[k].descricao);
+		return 1;
+	}
+	if(k==-1){
+		printf("\nPesquisa com código %s não encontrada", codigo);
+		return 0;
+	}
+}
+
+void imprimir_pesquisas(struct Pesquisa p[], int cont){
+	if(cont==0){
+		printf("\nNão há pesquisas registradas");
+	}
+	for(int i=0; i<cont; i++){
+		printf("\n\nCódigo: %s", p[i].codigo);
+		printf("\nDescrição: %s", p[i].descricao);
+	}
+}
+
+int remover_pesquisa(struct Pesquisa p[], int *cont, char codigo[])
+{
+	int k = consultar_codigo(p, *cont, codigo);
+	if(k==-1){
+		printf("\nPesquisa com código %s não encontrada", codigo);
+		return 0;
+	}
+	for(k; k<*cont; k++){
+		strcpy(p[k].codigo, p[k+1].codigo);
+		strcpy(p[k].descricao, p[k+1].descricao);
+	}
+	(*cont)--;
+	return 1;
+}
+
+int alterar_pesquisa(struct Pesquisa p[], int cont, const char codigo[])
+{
+	int k = consultar_codigo(p, cont, codigo);
+	if(k!=-1){
+		printf("\nEntre com a descrição da pesquisa: ");
+		fgets(p[k].descricao, sizeof(p[k].descricao), stdin);
+		p[k].descricao[strcspn(p[k].descricao, "\n")] = '\0';
+		return 1;
+	} else{
+		return 0;
+	}
+}
+
 int menu()
 {
 	printf("\nMENU PRINCIPAL\n\n");
@@ -175,7 +273,7 @@ int menu_pesquisa()
 	printf("\nMENU DE OPÇÕES DE PESQUISA\n\n");
 	printf("\t1. INSERIR UMA NOVA PESQUISA\n");
 	printf("\t2. CONSULTAR DADOS DE UMA PESQUISA\n");
-	printf("\t3. IMMPRIMIR TODAS AS PESQUISAS\n");
+	printf("\t3. IMPRIMIR TODAS AS PESQUISAS\n");
 	printf("\t4. EXCLUIR UMA PESQUISA\n");
 	printf("\t5. ALTERAR UMA PESQUISA\n");
 	printf("\t6. RETORNAR AO MENU PRINCIPAL\n");
@@ -205,15 +303,22 @@ int menu_resposta_pesquisa()
 int main()
 {
 	setlocale(LC_ALL, "Portuguese");
-	int capacidade = 50;
-	int cont = 0;
-	struct Funcionario *vet_funcionario = malloc(capacidade * sizeof(struct Funcionario));	
+	int capacidade_funcionario = 50;
+	int cont_funcionario = 0;
+	struct Funcionario *vet_funcionario = malloc(capacidade_funcionario * sizeof(struct Funcionario));	
 	if(vet_funcionario== NULL){
+		printf("\nErro ao alocar memória");
+		return 1;}
+	int capacidade_pesquisa = 50;
+	int cont_pesquisa =0;
+	struct Pesquisa *vet_pesquisa = malloc(capacidade_pesquisa * sizeof(struct Pesquisa));
+	if(vet_pesquisa==NULL){
 		printf("\nErro ao alocar memória");
 		return 1;
 	}
 	int op_menu, op_funcionario, op_pesquisa, op_resposta_pesquisa;
 	char cpf[15];
+	char codigo_pesquisa[10];
 	do{
 		op_menu = menu();
 		switch(op_menu){
@@ -223,7 +328,7 @@ int main()
 					switch (op_funcionario){
 						case 1:{
 							printf("\nInciando opção inserir");
-							if(inserir_funcionario(&vet_funcionario, &cont, &capacidade))
+							if(inserir_funcionario(&vet_funcionario, &cont_funcionario, &capacidade_funcionario))
 								{printf("\nInserido com sucesso");}
 							else{printf("\nNão foi possível inserir");}
 							break;
@@ -233,12 +338,12 @@ int main()
 							printf("\nEntre com o CPF do funcionário que deseja buscar: ");
 							fgets(cpf, sizeof(cpf), stdin);
 							cpf[strcspn(cpf, "\n")] = '\0';
-							consultar_funcionario(vet_funcionario, cont, cpf);
+							consultar_funcionario(vet_funcionario, cont_funcionario, cpf);
 							break;
 						}
 						case 3:{
 							printf("\nInciando opção imprimir");
-							imprimir_funcionarios(vet_funcionario, cont);
+							imprimir_funcionarios(vet_funcionario, cont_funcionario);
 							break;
 						}
 						case 4:{
@@ -246,7 +351,7 @@ int main()
 							printf("\nEntre com o CPF do funcionário que deseja remover: ");
 							fgets(cpf, sizeof(cpf), stdin);
 							cpf[strcspn(cpf, "\n")] = '\0';
-							if(remover_funcionario(vet_funcionario, &cont, cpf)==1){printf("\nRemovido com sucesso!");
+							if(remover_funcionario(vet_funcionario, &cont_funcionario, cpf)==1){printf("\nRemovido com sucesso!");
 							}else{printf("\nNão foi possível remover!");
 							}
 							break;
@@ -256,7 +361,7 @@ int main()
 							printf("\nEntre com o CPF do funcionário que deseja alterar: ");
 							fgets(cpf, sizeof(cpf), stdin);
 							cpf[strcspn(cpf, "\n")] = '\0'; 
-							if(alterar_funcionario(vet_funcionario, cont, cpf)==1){
+							if(alterar_funcionario(vet_funcionario, cont_funcionario, cpf)==1){
 								printf("\nAlterado com sucesso!");
 							}else{
 								printf("\nNão foi possível alterar!");
@@ -282,22 +387,42 @@ int main()
 					{
 					case 1:{
 						printf("\nInciando opção inserir");
+						if(inserir_pesquisa(&vet_pesquisa, &cont_pesquisa, &capacidade_pesquisa)){
+							printf("\nInserido com sucesso");
+						} else{printf("\nNão foi possível inserir");}
 						break;
 					}
 					case 2:{
 						printf("\nIniciando opção consultar");
+						printf("\nEntre com o código da pesquisa que deseja buscar: ");
+						fgets(codigo_pesquisa, sizeof(codigo_pesquisa), stdin);
+						codigo_pesquisa[strcspn(codigo_pesquisa, "\n")] = '\0';
+						consultar_pesquisa(vet_pesquisa, cont_pesquisa, codigo_pesquisa);
 						break;
 					}
 					case 3:{
 						printf("\nIniciando opção imprimir");
+						imprimir_pesquisas(vet_pesquisa, cont_pesquisa);
 						break;
 					}
 					case 4:{
 						printf("\nInciando opção remover");
+						printf("\nEntre com o código da pesquisa que deseja remover: ");
+						fgets(codigo_pesquisa, sizeof(codigo_pesquisa), stdin);
+						codigo_pesquisa[strcspn(codigo_pesquisa, "\n")] = '\0';
+						if(remover_pesquisa(vet_pesquisa, &cont_pesquisa, codigo_pesquisa)==1){
+							printf("\nRemovido com sucesso!");
+						}else{printf("\nNão foi possível remover!");}
 						break;
 					}
 					case 5:{
 						printf("\nIniciando opção alterar");
+						printf("\nEntre com o código da pesquisa que deseja alterar: ");
+						fgets(codigo_pesquisa, sizeof(codigo_pesquisa), stdin);
+						codigo_pesquisa[strcspn(codigo_pesquisa, "\n")] = '\0';
+						if(alterar_pesquisa(vet_pesquisa, cont_pesquisa, codigo_pesquisa)==1){
+							printf("\nAlterado com sucesso!");
+						}else{printf("\nNão foi possível alterar!");}
 						break;
 					}
 					case 6:{
