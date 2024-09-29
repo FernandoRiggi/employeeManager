@@ -11,7 +11,7 @@ struct Funcionario
 	float salario;
 };
 
-int consultar(struct Funcionario f[], int cont, const char cpf[])
+int consultar_cpf(struct Funcionario f[], int cont, const char cpf[])
 {
 	for(int i=0; i<cont; i++){
 		if(strcmp(f[i].cpf, cpf)==0){
@@ -26,21 +26,25 @@ int inserir_funcionario(struct Funcionario f[], int *cont)
 	if(*cont<500){
 		char cpf[15];
 		printf("\nEntre com o seu CPF: ");
-		fflush(stdin);
-		gets(cpf);
-		int k =consultar(f, *cont, cpf);
+		fgets(cpf, sizeof(cpf), stdin);
+		cpf[strcspn(cpf, "\n")] = '\0';
+
+		int k =consultar_cpf(f, *cont, cpf);
 		if(k==-1){
 			
 			printf("\nEntre com o seu nome: ");
-			fflush(stdin);
-			gets(f[*cont].nome);
+			fgets(f[*cont].nome, sizeof(f[*cont].nome), stdin);
+			f[*cont].nome[strcspn(f[*cont].nome, "\n")] = '\0';
 			strcpy(f[*cont].cpf, cpf);
 			printf("\nEntre com o seu cargo: ");
-			gets(f[*cont].cargo);
-			printf("\nEntre com o número de dependentes: ");
+			fgets(f[*cont].cargo, sizeof(f[*cont].cargo), stdin);
+			f[*cont].cargo[strcspn(f[*cont].cargo, "\n")] = '\0';
+			printf("\nEntre com o nÃºmero de dependentes: ");
 			scanf("%d", &f[*cont].dependentes);
-			printf("\nEntre com o salário-base: ");
+			getchar();
+			printf("\nEntre com o salÃ¡rio-base: ");
 			scanf("%f", &f[*cont].salario);
+			getchar();
 			(*cont)++;
 			return 1;
 		}
@@ -50,38 +54,38 @@ int inserir_funcionario(struct Funcionario f[], int *cont)
 
 int consultar_funcionario(struct Funcionario f[], int cont, char cpf[])
 {
-	int k = consultar(f, cont, cpf);
+	int k = consultar_cpf(f, cont, cpf);
 	if(k!=-1){
 		printf("\nNome: %s", f[k].nome);
 		printf("\nCargo: %s", f[k].cargo);
-		printf("\nSalário: %.2f", f[k].salario);
-		printf("\nNúmero de dependentes: %d", f[k].dependentes);
+		printf("\nSalÃ¡rio: %.2f", f[k].salario);
+		printf("\nNÃºmero de dependentes: %d", f[k].dependentes);
 		return 1;
 		}
 	if(k==-1){
-	printf("\nFuncionário com CPF %s não encontrado", cpf);
+	printf("\nFuncionÃ¡rio com CPF %s nÃ£o encontrado", cpf);
 	return 0;}
 }
 
 void imprimir_funcionario(struct Funcionario f[], int cont)
 {
 	if(cont==0){
-		printf("\nNão há funcionários registrados");
+		printf("\nNÃ£o hÃ¡ funcionÃ¡rios registrados");
 	}
 	for(int i=0; i<cont; i++){
 		printf("\nNome: %s", f[i].nome);
 		printf("\nCPF: %s", f[i].cpf);
 		printf("\nCargo: %s", f[i].cargo);
-		printf("\nsalário: %.2f", f[i].salario);
-		printf("\nNúmero de dependentes: %d", f[i].dependentes);
+		printf("\nsalÃ¡rio: %.2f", f[i].salario);
+		printf("\nNÃºmero de dependentes: %d", f[i].dependentes);
 	}
 }
 
 int remover_funcionario(struct Funcionario f[], int *cont, char cpf[])
 {
-	int k = consultar(f, *cont, cpf);
+	int k = consultar_cpf(f, *cont, cpf);
 	if(k==-1){
-		printf("\nFuncionário com CPF %s não encontrado", cpf);
+		printf("\nFuncionÃ¡rio com CPF %s nÃ£o encontrado", cpf);
 		return 0;
 	}
 	for(k; k<*cont; k++){
@@ -97,16 +101,20 @@ int remover_funcionario(struct Funcionario f[], int *cont, char cpf[])
 
 int alterar_funcionario(struct Funcionario f[], int cont, const char cpf[])
 {
-	int k = consultar(f, cont, cpf);
+	int k = consultar_cpf(f, cont, cpf);
 	if(k!=-1){
-		printf("\nEntre com o nome do funcionário: ");
-		fgets(f[k].nome, 50, stdin);
-		printf("\nEntre com o cargo do funcionário: ");
-		fgets(f[k].cargo, 30, stdin);
-		printf("\nEntre com o número de dependentes: ");
+		printf("\nEntre com o nome do funcionÃ¡rio: ");
+		fgets(f[k].nome, sizeof(f[k].nome), stdin);
+		f[k].nome[strcspn(f[k].nome, "\n")] = '\0';
+		printf("\nEntre com o cargo do funcionÃ¡rio: ");
+		fgets(f[k].cargo, sizeof(f[k].cargo), stdin);
+		f[k].cargo[strcspn(f[k].cargo, "\n")] = '\0';
+		printf("\nEntre com o nÃºmero de dependentes: ");
 		scanf("%d", &f[k].dependentes);
-		printf("\nEntre com o salário do funcionário: ");
+		getchar();
+		printf("\nEntre com o salÃ¡rio do funcionÃ¡rio: ");
 		scanf("%f", &f[k].salario);
+		getchar();
 		return 1;
 	}else{
 		return 0;
@@ -115,16 +123,17 @@ int alterar_funcionario(struct Funcionario f[], int cont, const char cpf[])
 
 int menu()
 {
-	printf("\nMENU DE OPÇÕES");
-	printf("\n1. INSERIR UM NOVO FUNCIONÁRIO");
-	printf("\n2. CONSULTAR DADOS DE UM FUNCIONÁRIO");
-	printf("\n3. IMPRIMIR TODOS OS FUNCIONÁRIOS");
-	printf("\n4. EXCLUIR UM FUNCIONÁRIO");
-	printf("\n5. ALTERAR UM FUNCIONÁRIO");
+	printf("\nMENU DE OPÃ‡Ã•ES");
+	printf("\n1. INSERIR UM NOVO FUNCIONÃRIO");
+	printf("\n2. CONSULTAR DADOS DE UM FUNCIONÃRIO");
+	printf("\n3. IMPRIMIR TODOS OS FUNCIONÃRIOS");
+	printf("\n4. EXCLUIR UM FUNCIONÃRIO");
+	printf("\n5. ALTERAR UM FUNCIONÃRIO");
 	printf("\n6. SAIR DO PROGRAMA");
-	printf("\nESCOLHA UMA OPÇÃO: ");
+	printf("\nESCOLHA UMA OPÃ‡ÃƒO: ");
 	int opc;
 	scanf("%d", &opc);
+	getchar();
 	return opc;
 }
 
@@ -138,47 +147,47 @@ main()
 		op=menu();
 		switch (op){
 			case 1:
-				printf("\nInciando opção inserir");
+				printf("\nInciando opÃ§Ã£o inserir");
 				if(inserir_funcionario(vet_funcionario, &cont))
 					{printf("\nInserido com sucesso");}
-				else{printf("\nNão foi possível inserir");}
+				else{printf("\nNÃ£o foi possÃ­vel inserir");}
 				break;
 			case 2:
-				printf("\nInciando opção consultar");
-				printf("\nEntre com o CPF do funcionario que deseja buscar: ");
-				fflush(stdin);
-				gets(cpf);
+				printf("\nInciando opÃ§Ã£o consultar");
+				printf("\nEntre com o CPF do funcionÃ¡rio que deseja buscar: ");
+				fgets(cpf, sizeof(cpf), stdin);
+				cpf[strcspn(cpf, "\n")] = '\0';
 				consultar_funcionario(vet_funcionario, cont, cpf);
 				break;
 			case 3:
-				printf("\nInciando opção imprimir");
+				printf("\nInciando opÃ§Ã£o imprimir");
 				imprimir_funcionario(vet_funcionario, cont);
 				break;
 			case 4:
-				printf("\nInciando opção remover");
-				printf("\nEntre com o CPF do funcionário que deseja remover: ");
-				fflush(stdin);
-				gets(cpf);
+				printf("\nInciando opÃ§Ã£o remover");
+				printf("\nEntre com o CPF do funcionÃ¡rio que deseja remover: ");
+				fgets(cpf, sizeof(cpf), stdin);
+				cpf[strcspn(cpf, "\n")] = '\0';
 				if(remover_funcionario(vet_funcionario, &cont, cpf)==1){printf("\nRemovido com sucesso!");
-				}else{printf("\nNão foi possível remover!");
+				}else{printf("\nNÃ£o foi possÃ­vel remover!");
 				}
 				break;
 			case 5:
-				printf("\nIniciando opção alterar");
-				printf("\nEntre com o CPF do funcionário que deseja alterar: ");
-				fflush(stdin);
-				gets(cpf);
+				printf("\nIniciando opÃ§Ã£o alterar");
+				printf("\nEntre com o CPF do funcionÃ¡rio que deseja alterar: ");
+				fgets(cpf, sizeof(cpf), stdin);
+				cpf[strcspn(cpf, "\n")] = '\0'; 
 				if(alterar_funcionario(vet_funcionario, cont, cpf)==1){
 					printf("\nAlterado com sucesso!");
 				}else{
-					printf("\nNão foi possível alterar!");
+					printf("\nNÃ£o foi possÃ­vel alterar!");
 				}
 				break;
 			case 6:
 				printf("\nSaindo do menu");
 				break;
 			default:
-				printf("\nOperação inválida");
+				printf("\nOperaÃ§Ã£o invÃ¡lida");
 				break;
 		}
 	} while(op!=6);
