@@ -8,8 +8,8 @@ struct Pessoa
 	char nome[50], cpf[15];
 	char data_nasc[11];
 	char sexo;
-	char **telefones;
-	int qtd_telefones;
+	int cont_tel;
+	char telefones[10][15];
 	char grau_escolaridade[30];
 };
 
@@ -63,6 +63,7 @@ int inserir_pessoas(struct Pessoa **p, int *cont, int *capacidade)
 	cpf[strcspn(cpf, "\n")] = '\0';
 
 	int k =consultar_cpf(*p, *cont, cpf);
+	int i=0;
 	if(k==-1){
 			
 		printf("\nEntre com o seu nome: ");
@@ -78,6 +79,22 @@ int inserir_pessoas(struct Pessoa **p, int *cont, int *capacidade)
 		printf("\nEntre com o seu grau de escolaridade: ");
 		fgets((*p)[*cont].grau_escolaridade, sizeof((*p)[*cont].grau_escolaridade), stdin);
 		(*p)[*cont].grau_escolaridade[strcspn((*p)[*cont].grau_escolaridade, "\n")] = '\0';
+		
+		do{
+		printf("\nEntre com a quantidade de telefones que deseja adicionar, máximo de 10 telefones por pessoa: ");
+		scanf("%d", &((*p)[*cont].cont_tel));
+		getchar();
+
+		if((*p)[*cont].cont_tel<1 || (*p)[*cont].cont_tel>10){
+			printf("\nQuantidade inválida! Entre com um número entre 1 e 10");
+			}
+		}while((*p)[*cont].cont_tel < 1 || (*p)[*cont].cont_tel > 10);
+		int i=0;
+		for(i;i<(*p)[*cont].cont_tel;i++){
+			printf("\nEntre com o telefone n°%d: ", i+1);
+			fgets((*p)[*cont].telefones[i], sizeof((*p)[*cont].telefones), stdin);
+			(*p)[*cont].telefones[i][strcspn((*p)[*cont].telefones[i], "\n")] = '\0';		
+		}
 		(*cont)++;
 		return 1;
 		}
@@ -89,6 +106,14 @@ int consultar_pessoas(struct Pessoa p[], int cont, char cpf[])
 	int k = consultar_cpf(p, cont, cpf);
 	if(k!=-1){
 		printf("\nNome: %s", p[k].nome);
+		printf("\nCPF: %s", p[k].cpf);
+		printf("\nData de nascimento: %s", p[k].data_nasc);
+		printf("\nSexo: %c", p[k].sexo);
+		printf("\nGrau de escolaridade: %s", p[k].grau_escolaridade);
+		int i=0;
+		for(i;i<p[k].cont_tel;i++){
+			printf("\nTelefone n° %d: %s", i+1, p[k].telefones[i]);
+		}
 		return 1;
 		}
 	if(k==-1){
@@ -104,6 +129,13 @@ void imprimir_pessoas(struct Pessoa p[], int cont)
 	for(int i=0; i<cont; i++){
 		printf("\n\nNome: %s", p[i].nome);
 		printf("\nCPF: %s", p[i].cpf);
+		printf("\nData de nascimento: %s", p[i].data_nasc);
+		printf("\nSexo: %c", p[i].sexo);
+		printf("\nGrau de escolaridade: %s", p[i].grau_escolaridade);
+		int j=0;
+		for(j;j<p[i].cont_tel;j++){
+			printf("\nTelefone n° %d: %s",j+1, p[i].telefones[j]);
+		}
 	}
 }
 
@@ -117,6 +149,14 @@ int remover_pessoas(struct Pessoa p[], int *cont, char cpf[])
 	for(k; k<*cont; k++){
 		strcpy(p[k].nome, p[k+1].nome);
 		strcpy(p[k].cpf, p[k+1].cpf);
+		strcpy(p[k].data_nasc, p[k+1].data_nasc);
+		p[k].sexo = p[k+1].sexo;
+		strcpy(p[k].grau_escolaridade, p[k+1].grau_escolaridade);
+		p[k].cont_tel =  p[k+1].cont_tel;
+		int i=0;
+		for(i;i<p[k].cont_tel;i++){
+			strcpy(p[k].telefones[i], p[k+1].telefones[i]);
+		}
 	}
 	(*cont)--;
 	return 1;
@@ -129,6 +169,29 @@ int alterar_pessoa(struct Pessoa p[], int cont, const char cpf[])
 		printf("\nEntre com o nome da pessoa: ");
 		fgets(p[k].nome, sizeof(p[k].nome), stdin);
 		p[k].nome[strcspn(p[k].nome, "\n")] = '\0';
+		printf("\nEntre com a data de nascimento da pessoa: ");
+		fgets(p[k].data_nasc, sizeof(p[k].data_nasc), stdin);
+		p[k].data_nasc[strcspn(p[k].data_nasc, "\n")] = '\0';
+		printf("\nEntre com o seu sexo, 'M' para masculino, 'F' para feminino, 'O' para outros: ");
+		p[k].sexo = getchar();
+		printf("\nEntre com o grau de escolaridade: ");
+		fgets(p[k].grau_escolaridade, sizeof(p[k].grau_escolaridade), stdin);
+		p[k].grau_escolaridade[strcspn(p[k].grau_escolaridade, "\n")] = '\0';
+		do{
+		printf("\nEntre com a quantidade de telefones que deseja adicionar, máximo de 10 telefones por pessoa: ");
+		scanf("%d", &(p)[k].cont_tel);
+		getchar();
+
+		if(p[k].cont_tel<1 || p[k].cont_tel>10){
+			printf("\nQuantidade inválida! Entre com um número entre 1 e 10");
+			}
+		}while(p[k].cont_tel < 1 || p[k].cont_tel > 10);
+		int i=0;
+		for(i;i<p[k].cont_tel;i++){
+			printf("\nEntre com o telefone n°%d: ", i+1);
+			fgets(p[k].telefones[i], sizeof(p[k].telefones), stdin);
+			p[k].telefones[i][strcspn(p[k].telefones[i], "\n")] = '\0';		
+		}
 		return 1;
 	}else{
 		return 0;
