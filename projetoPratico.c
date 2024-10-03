@@ -343,11 +343,40 @@ void imprimir_respostas(struct RespostaPesquisa rp[], int cont){
 		printf("\nNão há respostas registradas");
 	}
 	for(int i=0; i<cont; i++){
-		printf("\n\nCPF: %s", rp[cont].cpf);
-		printf("\nCódigo: %s", rp[cont].codigoPesquisa);
-		printf("\nData: %s", rp[cont].data);
-		printf("\nRespota: %s", rp[cont].resposta);
+		printf("\n\nCPF: %s", rp[i].cpf);
+		printf("\nCódigo: %s", rp[i].codigoPesquisa);
+		printf("\nData: %s", rp[i].data);
+		printf("\nRespota: %s", rp[i].resposta);
 
+	}
+}
+
+int remover_respostas(struct RespostaPesquisa rp[], int *cont, char codigo[], char cpf[]){
+	int k = consultar_cpf_codigo_resposta(rp, *cont, cpf, codigo);
+	if(k==-1){
+		printf("\nResposta com o cpf %s e código %s não encontrada", cpf, codigo);
+		return 0;
+	}
+	for(k; k<*cont; k++){
+		strcpy(rp[k].cpf, rp[k+1].cpf);
+		strcpy(rp[k].codigoPesquisa, rp[k+1].codigoPesquisa);
+		strcpy(rp[k].data, rp[k+1].data);
+		strcpy(rp[k].resposta, rp[k+1].resposta);
+	}
+	(*cont)--;
+	return 1;
+}
+
+int alterar_resposta(struct RespostaPesquisa rp[], int cont, const char codigo[], const char cpf[])
+{
+	int k = consultar_cpf_codigo_resposta(rp, cont, codigo, cpf);
+	if(k!=-1){
+		printf("\nEntre com a resposta da pesquisa: ");
+		fgets(rp[k].resposta, sizeof(rp[k].resposta), stdin);
+		rp[k].resposta[strcspn(rp[k].resposta, "\n")] = '\0';
+		return 1;
+	} else{
+		return 0;
 	}
 }
 
@@ -382,6 +411,18 @@ int menus(char titulo[], char conteudo[])
 	return opc;
 }
 
+int menu_rel(){
+	printf("\nMENU DE RELÁTORIOS\n\n");
+	printf("\t1. MOSTRAR TODOS OS TELEFONES DE UMA PESSOA\n");
+	printf("\t2. MOSTRAR A DESCRIÇÃO E TODAS AS RESPOSTAS DE DETERMINADA PESQUISA REALIZADA EM UMA DATA ESPECÍFICA\n");
+	printf("\t3. MOSTRAR O CÓDIGO E A DESCRIÇÃO DE TODAS AS PESQUISAS REALIZDAS ENTRE AS DATAS ESCOLHIDAS\n");
+	printf("\t4. RETORNAR AO MENU PRINCIPAL\n");
+	int opc;
+	scanf("%d", &opc);
+	getchar();
+	return opc;
+}
+
 int main()
 {
 	setlocale(LC_ALL, "Portuguese");
@@ -405,11 +446,12 @@ int main()
 		printf("\nErro ao alocar memória");
 		return 1;
 	}
-	int op_menu, op_pessoa, op_pesquisa, op_resposta_pesquisa;
+	int op_menu, op_pessoa, op_pesquisa, op_resposta_pesquisa, op_relatorios;
 	char cpf[15];
 	char codigo_pesquisa[10];
 	char pessoa[7] = "PESSOA"; char pessoas[8] = "PESSOAS"; char pesquisa[9] = "PESQUISA"; char pesquisas[10]="PESQUISAS";
 	char resposta[9] = "RESPOSTA"; char respostas[10]="RESPOSTAS";
+	char codigo_resposta[10];
 	do{
 		op_menu = menu();
 		switch(op_menu){
@@ -558,10 +600,27 @@ int main()
 					}
 					case 4:{
 						printf("\nInciando opção remover");
+						printf("\nEntre com o cpf da pessoa que realizou a resposta que deseja remover");
+						fgets(cpf, sizeof(cpf), stdin);
+						cpf[strcspn(cpf, "\n")] = '\0';
+						printf("\nEntre com código da pesquisa que deseja remover a resposta");
+						fgets(codigo_resposta, sizeof(codigo_resposta), stdin);
+						codigo_resposta[strcspn(codigo_resposta, "\n")] = '\0';
+						if(remover_respostas(vet_resposta, &cont_resposta, codigo_resposta, cpf)==1){
+							printf("\nRemovido com sucesso");
+						}else{printf("\nNão foi possível remover");}
 						break;
 					}
 					case 5:{
 						printf("\nIniciando opção alterar");
+						printf("\nEntre com o cpf da pessoa que realizou a resposta que deseja alterar");
+						fgets(cpf, sizeof(cpf), stdin);
+						cpf[strcspn(cpf, "\n")] = '\0';
+						printf("\nEntre com código da pesquisa que deseja alterar a resposta");
+						fgets(codigo_resposta, sizeof(codigo_resposta), stdin);
+						if(alterar_resposta(vet_resposta, cont_resposta, codigo_resposta, cpf)==1){
+							printf("\nAlterado com sucesso");
+						}else{printf("\nNão foi possível alterar");}
 						break;
 					}
 					case 6:{
@@ -574,6 +633,30 @@ int main()
 					}
 					}
 				} while(op_resposta_pesquisa!=6);
+				break;
+			}
+			case 4:{
+				do{
+					op_relatorios = menu_rel();
+					switch(op_relatorios){
+						case 1:{
+							printf("\nINICIANDO OPÇÃO DE MOSTRAR OS TELEFONES DE UMA PESSOA");
+							break;
+						}
+						case 2:{
+							printf("\nIniando a opção de mostrar a descrição e respostas de determinada pesquisada realizada em uma data");
+							break;
+						}
+						case 3:{
+							printf("\nInciando opção de mostrar o código e a descrição de todas as pesquisas realizadas entres certas datas");
+							break;
+						}
+						default:{
+							printf("\nOperação inválida");
+							break;
+						}
+					}
+				} while(op_relatorios!=4);
 				break;
 			}
 		}
