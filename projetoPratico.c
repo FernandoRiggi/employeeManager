@@ -380,6 +380,18 @@ int alterar_resposta(struct RespostaPesquisa rp[], int cont, const char codigo[]
 	}
 }
 
+void mostrar_telefones(struct Pessoa p[], const char cpf[], const char cont){
+	int k = consultar_cpf(p, cont, cpf);
+	if(k!=-1){
+		int i =0;
+		for(i;i<p[k].cont_tel; i++){
+			printf("\nTelefone n° %d da pessoa com o cpf %s: %s", i+1, cpf, p[k].telefones[i]);
+		}
+	}
+	else{printf("\nNão há uma pessoa registrada com esse cpf");}
+}
+
+
 int menu()
 {
 	printf("\nMENU PRINCIPAL\n\n");
@@ -641,6 +653,10 @@ int main()
 					switch(op_relatorios){
 						case 1:{
 							printf("\nINICIANDO OPÇÃO DE MOSTRAR OS TELEFONES DE UMA PESSOA");
+							printf("\nDigite o cpf da pessoa que quer consultar os telefones: ");
+							fgets(cpf, sizeof(cpf), stdin);
+							cpf[strcspn(cpf, "\n")] = '\0';
+							mostrar_telefones(vet_pessoa, cpf, cont_pessoa);
 							break;
 						}
 						case 2:{
