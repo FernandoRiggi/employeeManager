@@ -21,7 +21,7 @@ struct Pesquisa{
 struct RespostaPesquisa{
 	char cpf[15];
 	char codigoPesquisa[10];
-	char data[11];
+	char data[20];
 	char resposta[500];
 };
 
@@ -310,18 +310,22 @@ int inserir_resposta(struct Pessoa **f, struct Pesquisa **p, struct RespostaPesq
 		return 0;
 	}
 
-   
-
+	int index = consultar_cpf_codigo_resposta(*rp, *cont_resposta, cpf, codigo);
+	if(index==-1){
 	printf("\nEntre com a data da resposta da pesquisa: ");
+	fflush(stdin);
 	fgets((*rp)[*cont_resposta].data, sizeof((*rp)[*cont_resposta].data), stdin);
 	(*rp)[*cont_resposta].data[strcspn((*rp)[*cont_resposta].data, "\n")] = '\0';
-	printf("\nEntre com a resposta da pesquisa: ");
+	fflush(stdin);
+	printf("\nEntre com a resposta da pesquisa: "); 
 	fgets((*rp)[*cont_resposta].resposta, sizeof((*rp)[*cont_resposta].resposta), stdin);
 	(*rp)[*cont_resposta].resposta[strcspn((*rp)[*cont_resposta].resposta, "\n")] = '\0';
 	strcpy((*rp)[*cont_resposta].cpf, cpf);
 	strcpy((*rp)[*cont_resposta].codigoPesquisa, codigo);
 	(*cont_resposta)++;
 	return 1;
+	}
+	return 0;
 }
 
 int consultar_resposta(struct RespostaPesquisa rp[], int cont, char codigo[], char cpf[])
@@ -380,7 +384,7 @@ int alterar_resposta(struct RespostaPesquisa rp[], int cont, const char codigo[]
 	}
 }
 
-void mostrar_telefones(struct Pessoa p[], const char cpf[], const char cont){
+void mostrar_telefones(struct Pessoa p[], const char cpf[], int cont){
 	int k = consultar_cpf(p, cont, cpf);
 	if(k!=-1){
 		int i =0;
@@ -391,6 +395,20 @@ void mostrar_telefones(struct Pessoa p[], const char cpf[], const char cont){
 	else{printf("\nNão há uma pessoa registrada com esse cpf");}
 }
 
+void mostrar_desc_resposta(struct RespostaPesquisa r[], const char codigo[], const char data[], int cont_resposta){
+	printf("\nDescrição da pesquisa de codigo %s", codigo);
+	int i=0, j=0;;
+			
+	for(i;i<cont_resposta;i++){
+		if(strcmp(r[i].data, data)==0 && strcmp(r[i].codigoPesquisa, codigo)==0){
+			printf("\nResposta n° %d da pesquisa: %s", j+1, r[i].resposta);
+			j++;
+			}
+		}
+	if(j==0){
+		printf("\nNão há uma pesquisa registrada com esse código");
+	}
+}
 
 int menu()
 {
@@ -425,10 +443,11 @@ int menus(char titulo[], char conteudo[])
 
 int menu_rel(){
 	printf("\nMENU DE RELÁTORIOS\n\n");
-	printf("\t1. MOSTRAR TODOS OS TELEFONES DE UMA PESSOA\n");
-	printf("\t2. MOSTRAR A DESCRIÇÃO E TODAS AS RESPOSTAS DE DETERMINADA PESQUISA REALIZADA EM UMA DATA ESPECÍFICA\n");
-	printf("\t3. MOSTRAR O CÓDIGO E A DESCRIÇÃO DE TODAS AS PESQUISAS REALIZDAS ENTRE AS DATAS ESCOLHIDAS\n");
+	printf("\t1. TELEFONES DE UMA PESSOA\n");
+	printf("\t2. DESCRIÇÃO E RESPOSTAS DE PESQUISA REALIZADA EM UMA DATA\n");
+	printf("\t3. CÓDIGO E DESCRIÇÃO DE PESQUISAS ENTRE DATAS\n");
 	printf("\t4. RETORNAR AO MENU PRINCIPAL\n");
+	printf("\nESCOLHA UMA OPÇÃO: ");
 	int opc;
 	scanf("%d", &opc);
 	getchar();
@@ -661,6 +680,14 @@ int main()
 						}
 						case 2:{
 							printf("\nIniando a opção de mostrar a descrição e respostas de determinada pesquisada realizada em uma data");
+							printf("\nEntre com o código da pesquisa que deseja consultar as respostas: ");
+							fgets(codigo_pesquisa, sizeof(codigo_pesquisa), stdin);
+							codigo_pesquisa[strcspn(codigo_pesquisa, "\n")] = '\0';
+							char data[11];
+							printf("\nEntre com a data que deseja consultar as respostas da pesquisa: ");
+							fgets(data, sizeof(data), stdin);
+							data[strcspn(data, "\n")] = '\0';
+							mostrar_desc_resposta(vet_resposta, codigo_pesquisa, data, cont_resposta);
 							break;
 						}
 						case 3:{
