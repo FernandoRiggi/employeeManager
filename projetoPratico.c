@@ -2,11 +2,12 @@
 #include <stdio.h>
 #include <locale.h>
 #include <string.h>
+#include <time.h>
 
 struct Pessoa
 {
 	char nome[50], cpf[15];
-	char data_nasc[11];
+	char data_nasc[15];
 	char sexo;
 	int cont_tel;
 	char telefones[10][15];
@@ -410,6 +411,188 @@ void mostrar_desc_resposta(struct RespostaPesquisa r[], const char codigo[], con
 	}
 }
 
+struct tm criarStructTm(const char *dataStr){
+	struct tm data = {0};
+	sscanf(dataStr, "%d/%d/%d", &data.tm_mday, &data.tm_mon, &data.tm_year);
+	data.tm_mon -=1;
+	data.tm_year -=1900;
+	return data;
+}
+
+void mostrarPesquisasEntreDatas(time_t inicio, time_t fim, struct RespostaPesquisa *r, int contPesquisa, int contResposta, struct Pesquisa *p){
+	printf("\nPesquisas realizadas entre as datas especificadas: ");
+	int i=0, j=0;
+	for(i;i<contResposta;i++){
+		struct tm dataPesquisa = criarStructTm(r[i].data);
+		time_t tempoPesquisa = mktime(&dataPesquisa);
+		if(tempoPesquisa>=inicio&& tempoPesquisa<=fim){
+			for(j;j<contPesquisa;j++){
+				if(strcmp(r[i].codigoPesquisa, p[j].codigo)==0){
+					printf("Código: %s, Descrição: %s, Data: %s", p[j].codigo, p[j].descricao, r[i].data);
+				}
+			}
+		}
+	}
+}
+
+void gravarPessoas(struct Pessoa *vet_pessoa, int cont_pessoa){
+	FILE *arquivo;
+	if((arquivo = fopen("pessoa.dat", "wb"))==NULL){
+		printf("Erro na criação do arquivo");
+		exit(0);
+	}
+	int i=0;
+	for(i;i<cont_pessoa;i++){
+		fwrite(&vet_pessoa[i], sizeof(struct Pessoa),1, arquivo);
+	}
+	fclose(arquivo);
+}
+
+void ler_pessoa(struct Pessoa **vet_pessoa, int *cont_pessoa, int *capacidade_pessoa){
+	FILE *arquivo;
+	long tamanho;
+	int n_pessoa;
+	
+	arquivo = fopen("pessoa.dat", "rb");
+	if(arquivo==NULL){
+		printf("\nNâo foi possível abrir o arquivo para leitura.");
+		return;
+	}
+	int resultado;
+
+	fseek(arquivo, 0, SEEK_END);
+	tamanho=ftell(arquivo);
+	rewind(arquivo);
+
+	n_pessoa = tamanho/sizeof(struct Pessoa);
+
+	if(n_pessoa>*capacidade_pessoa){
+		struct Pessoa *temp = realloc(*vet_pessoa, n_pessoa * sizeof(struct Pessoa));
+		if(temp == NULL){
+			printf("\nErro ao alocar memória para ler os dados");
+			fclose(arquivo);
+			return;
+	}
+		*vet_pessoa=temp;
+		*capacidade_pessoa=n_pessoa;
+
+	}
+		
+	resultado = fread(*vet_pessoa, sizeof(struct Pessoa), n_pessoa, arquivo);
+	if(resultado!=n_pessoa){
+			printf("\nErro ao ler os dados do arquivo");
+		}else{
+			printf("Lidos com sucesso");
+			*cont_pessoa = n_pessoa;
+		}
+	fclose(arquivo);
+	
+}
+
+void ler_pesquisa(struct Pesquisa **vet_pesquisa, int *cont_pesquisa, int *capacidade_pesquisa){
+	FILE *arquivo;
+	long tamanho;
+	int n_pesquisa;
+	arquivo = fopen("pesquisa.dat", "rb");
+	if(arquivo==NULL){
+		printf("\nNão foi possível abrir o arquivo");
+		return;
+	}
+
+	int resultado;
+	fseek(arquivo, 0, SEEK_END);
+	tamanho=ftell(arquivo);
+	rewind(arquivo);
+
+	n_pesquisa = tamanho/sizeof(struct Pesquisa);
+
+	if(n_pesquisa>*capacidade_pesquisa){
+		struct Pesquisa *temp = realloc(*vet_pesquisa, n_pesquisa *sizeof(struct Pesquisa));
+		if(temp==NULL){
+			printf("\nErro ao ler os dados do arquivo");
+			fclose(arquivo);
+			return;
+		}
+		*vet_pesquisa=temp;
+		*capacidade_pesquisa = n_pesquisa;
+	}
+
+	resultado=fread(*vet_pesquisa, sizeof(struct Pesquisa), n_pesquisa, arquivo);
+	if(resultado!=n_pesquisa){
+		printf("\nErro ao ler os dados do arquivo");
+	}else{
+		printf("\nLidos com sucesso");
+		*cont_pesquisa=n_pesquisa;
+	}
+	fclose(arquivo);
+}
+
+void ler_resposta(struct RespostaPesquisa **vet_resposta, int *cont_resposta, int *capacidade_resposta){
+	FILE *arquivo;
+	long tamanho;
+	int n_resposta;
+	arquivo=fopen("resposta.dat", "rb");
+	if(arquivo==NULL){
+		printf("\nNão foi possível abrir o arquivo");
+		return;
+	}
+
+	int resultado;
+	fseek(arquivo, 0, SEEK_END);
+	tamanho=ftell(arquivo);
+	rewind(arquivo);
+
+	n_resposta=tamanho/sizeof(struct RespostaPesquisa);
+
+	if(n_resposta>*capacidade_resposta){
+		struct RespostaPesquisa *temp = realloc(*vet_resposta, n_resposta *sizeof(struct RespostaPesquisa));
+		if(temp==NULL){
+			printf("\nErro ao ler os dados do arquivo");
+			fclose(arquivo);
+			return;
+		}
+		*vet_resposta=temp;
+		*capacidade_resposta=n_resposta;
+	}
+	
+	resultado=fread(*vet_resposta, sizeof(struct RespostaPesquisa), n_resposta, arquivo);
+	if(resultado!=n_resposta){
+		printf("\nErro ao ler os dados do arquivo");
+	}else{
+		printf("\nLido com sucesso");
+		*cont_resposta=n_resposta;
+	}
+	fclose(arquivo);
+}
+
+
+void gravar_pesquisa(struct Pesquisa *vet_pesquisa, int cont_pesquisa){
+	FILE *arquivo;
+	if((arquivo=fopen("pesquisa.dat", "wb"))==NULL){
+		printf("\nErro na criação do arquivo");
+		exit(0);
+	}
+	int i=0;
+	for(i;i<cont_pesquisa;i++){
+		fwrite(&vet_pesquisa[i], sizeof(struct Pesquisa), 1, arquivo);
+	}
+	fclose(arquivo);
+}
+
+void gravar_resposta(struct RespostaPesquisa *vet_resposta, int cont_resposta){
+	FILE *arquivo;
+	if((arquivo=fopen("resposta.dat", "wb"))==NULL){
+		printf("\nErro na criação do arquivo");
+		exit(0);
+	}
+	int i=0;
+	for(i;i<cont_resposta;i++){
+		fwrite(&vet_resposta[i], sizeof(struct RespostaPesquisa), 1, arquivo);
+	}
+	fclose(arquivo);
+}
+
+
 int menu()
 {
 	printf("\nMENU PRINCIPAL\n\n");
@@ -473,7 +656,7 @@ int main()
 	int capacidade_resposta = 50;
 	int cont_resposta =0;
 	struct RespostaPesquisa *vet_resposta = malloc(capacidade_resposta * sizeof(struct RespostaPesquisa));
-	if(vet_resposta=NULL){
+	if(vet_resposta==NULL){
 		printf("\nErro ao alocar memória");
 		return 1;
 	}
@@ -487,6 +670,7 @@ int main()
 		op_menu = menu();
 		switch(op_menu){
 			case 1:{
+				ler_pessoa(&vet_pessoa, &cont_pessoa, &capacidade_pessoa);
 				do{	
 					op_pessoa=menus(pessoas, pessoa);
 					switch (op_pessoa){
@@ -534,6 +718,7 @@ int main()
 						}
 						case 6:{
 							printf("\nRetornando ao Menu Principal");
+							gravarPessoas(vet_pessoa, cont_pessoa);
 							break;
 						}
 						default:{
@@ -545,6 +730,7 @@ int main()
 				break;
 			}
 			case 2:{
+				ler_pesquisa(&vet_pesquisa, &cont_pesquisa, &capacidade_pesquisa);
 				do{
 					op_pesquisa = menus(pesquisas, pesquisa);
 					switch (op_pesquisa)
@@ -591,6 +777,7 @@ int main()
 					}
 					case 6:{
 						printf("\nRetornando ao Menu Principal");
+						gravar_pesquisa(vet_pesquisa, cont_pesquisa);
 						break;
 					}
 					default:{
@@ -602,6 +789,7 @@ int main()
 				break;
 			}
 			case 3:{
+				ler_resposta(&vet_resposta, &cont_resposta, &capacidade_resposta);
 				do{
 					op_resposta_pesquisa = menus(respostas, resposta);
 					switch(op_resposta_pesquisa)
@@ -656,6 +844,7 @@ int main()
 					}
 					case 6:{
 						printf("\nRetornando ao Menu Principal");
+						gravar_resposta(vet_resposta, cont_resposta);
 						break;
 					}
 					default:{
@@ -667,6 +856,9 @@ int main()
 				break;
 			}
 			case 4:{
+				ler_pessoa(&vet_pessoa, &cont_pessoa, &capacidade_pessoa);
+				ler_pesquisa(&vet_pesquisa, &cont_pesquisa, &capacidade_pesquisa);
+				ler_resposta(&vet_resposta, &cont_resposta, &capacidade_resposta);				
 				do{
 					op_relatorios = menu_rel();
 					switch(op_relatorios){
@@ -692,7 +884,19 @@ int main()
 						}
 						case 3:{
 							printf("\nInciando opção de mostrar o código e a descrição de todas as pesquisas realizadas entres certas datas");
-							break;
+							char dataInicioStr[15], datafimStr[15];
+							printf("\nEntre com a data de iníco (dd/mm/aaaa): ");
+							fgets(dataInicioStr, sizeof(dataInicioStr), stdin);
+							dataInicioStr[strcspn(dataInicioStr, "\n")] = '\0';
+							printf("\nEntre com a data de fim (dd/mm/aaaa): ");
+							fgets(datafimStr, sizeof(datafimStr), stdin);
+							datafimStr[strcspn(datafimStr, "\n")] = '\0';
+							struct tm dataInicio = criarStructTm(dataInicioStr);
+							struct tm datafim = criarStructTm(datafimStr);
+							time_t inicio =mktime(&dataInicio);
+							time_t fim = mktime(&datafim);
+							mostrarPesquisasEntreDatas(inicio, fim , vet_resposta, cont_pesquisa, cont_resposta, vet_pesquisa);
+							break;	
 						}
 						default:{
 							printf("\nOperação inválida");
