@@ -56,9 +56,9 @@ void mostrar_desc_resposta(struct RespostaPesquisa r[], const char codigo[], con
 
 struct tm criarStructTm(const char *dataStr){
 	struct tm data = {0};
-	sscanf(dataStr, "%d/%d/%d", &data.tm_mday, &data.tm_mon, &data.tm_year);
+	sscanf(dataStr, "%d/%d/%d", &data.tm_mday, &data.tm_mon, &data.tm_year); //uso de sscanf para pegar a data já passada
 	data.tm_mon -=1;
-	data.tm_year -=1900;
+	data.tm_year -=1900; // as datas vão valer a partir de 1900
 	return data;
 }
 
@@ -73,14 +73,14 @@ void mostrarPesquisasEntreDatas(time_t inicio, time_t fim, struct RespostaPesqui
 	fprintf(arquivo, "---Pesquisas realizadas entre %s e %s---\n", inicioStr, fimStr);
 	
 	for(i;i<contResposta;i++){
-		struct tm dataPesquisa = criarStructTm(r[i].data);
-		time_t tempoPesquisa = mktime(&dataPesquisa);
+		struct tm dataPesquisa = criarStructTm(r[i].data); // transforma a data para uma struct tm
+		time_t tempoPesquisa = mktime(&dataPesquisa); //  converte a struct tm para time_t
 	
 		if(tempoPesquisa>=inicio&& tempoPesquisa<=fim){
 			for(j=0;j<contPesquisa;j++){
 				if(strcmp(r[i].codigoPesquisa, p[j].codigo)==0){
 					char dataLimpa[20];
-					sscanf(r[i].data, "%[^\n]", dataLimpa);
+					sscanf(r[i].data, "%[^\n]", dataLimpa); // estou tirando caracteres desnecessários
 					
 					fprintf(arquivo, "Código: %s, Descrição: %s, Data: %s\n",p[j].codigo, p[j].descricao, dataLimpa);
 				}

@@ -1,6 +1,7 @@
 #include "../headers/pesquisa.h"
 #include "../headers/pessoa.h"
 #include "../headers/resposta.h"
+#include "../headers/memoria.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -16,22 +17,13 @@ int consultar_cpf_codigo_resposta(struct RespostaPesquisa rp[], int cont, const 
 
 int inserir_resposta(struct Pessoa **f, struct Pesquisa **p, struct RespostaPesquisa **rp, int *cont_pessoa, int *cont_pesquisa, int *cont_resposta, int *capacidade)
 {
-	if(*rp==NULL){
-		*rp = malloc((*capacidade)*sizeof(struct RespostaPesquisa));
-		if(*rp==NULL){
-			printf("\nErro ao alocar memória");
-			return 0;
-		}
-	}
-	
 	if(*cont_resposta>=*capacidade){
-		*capacidade *=2;
-		*rp = realloc(*rp, (*capacidade) * sizeof(struct RespostaPesquisa));
-		if(*rp==NULL){
-			printf("\nErro ao realocar memória");
+		*capacidade *=2; //dobra a capacidade
+		if(!realocar_memoria((void**)p, *capacidade, sizeof(struct RespostaPesquisa))){
 			return 0;
 		}
 	}
+
 	char cpf[15];
 	printf("\nEntre com o cpf: ");
 	fgets(cpf, sizeof(cpf), stdin);
@@ -41,6 +33,7 @@ int inserir_resposta(struct Pessoa **f, struct Pesquisa **p, struct RespostaPesq
 		printf("\nCPF não encontrado!");
 		return 0;
 	}
+	
 	char codigo[10];
 	printf("\nEntre com o código: ");
 	fgets(codigo, sizeof(codigo), stdin);

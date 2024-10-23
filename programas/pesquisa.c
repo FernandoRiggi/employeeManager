@@ -1,4 +1,5 @@
 #include "../headers/pesquisa.h"
+#include "../headers/memoria.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,9 +16,8 @@ int consultar_codigo(struct Pesquisa p[], int cont, const char codigo[])
 
 int inserir_pesquisa( struct Pesquisa **p, int *cont, int *capacidade){
 	if(*cont>=*capacidade){
-		*p = realloc(*p, (*capacidade) * sizeof(struct Pesquisa));
-		if(*p==NULL){
-			printf("\nERRO AO ALOCAR MEMÓRIA");
+		*capacidade *=2; //dobra o tamanho de capacidade
+		if(!realocar_memoria((void**)p, *capacidade, sizeof(struct Pesquisa))){
 			return 0;
 		}
 	}

@@ -1,4 +1,5 @@
 #include "../headers/pessoa.h"
+#include "../headers/memoria.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,6 +16,13 @@ int consultar_cpf(struct Pessoa p[], int cont, const char cpf[])
 
 int inserir_pessoas(struct Pessoa **p, int *cont, int *capacidade)
 {
+	if(*cont>=*capacidade){
+		*capacidade *=2; //dobra o tamanho de capacidade
+		if(!realocar_memoria((void**)p, *capacidade, sizeof(struct Pessoa))){
+			return 0;
+		}
+	}
+	
 	char cpf[15];
 	printf("\nEntre com o seu CPF: ");
 	fgets(cpf, sizeof(cpf), stdin);

@@ -3,6 +3,7 @@
 #include "../headers/resposta.h"
 #include "../headers/relatorio.h"
 #include "../headers/menu.h"
+#include "../headers/memoria.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,22 +15,19 @@ int main()
 	setlocale(LC_ALL, "Portuguese");
 	int capacidade_pessoa = 50;
 	int cont_pessoa = 0;
-	struct Pessoa *vet_pessoa = malloc(capacidade_pessoa * sizeof(struct Pessoa));	
-	if(vet_pessoa== NULL){
-		printf("\nErro ao alocar memória");
+	struct Pessoa *vet_pessoa = NULL; 
+	if(!alocar_memoria((void**)&vet_pessoa, capacidade_pessoa, sizeof(struct Pessoa))){
 		return 1;}
 	int capacidade_pesquisa = 50;
 	int cont_pesquisa =0;
-	struct Pesquisa *vet_pesquisa = malloc(capacidade_pesquisa * sizeof(struct Pesquisa));
-	if(vet_pesquisa==NULL){
-		printf("\nErro ao alocar memória");
+	struct Pesquisa *vet_pesquisa = NULL; 
+	if(!alocar_memoria((void**)&vet_pesquisa, capacidade_pessoa, sizeof(struct Pesquisa))){
 		return 1;
 	}
 	int capacidade_resposta = 50;
 	int cont_resposta =0;
-	struct RespostaPesquisa *vet_resposta = malloc(capacidade_resposta * sizeof(struct RespostaPesquisa));
-	if(vet_resposta==NULL){
-		printf("\nErro ao alocar memória");
+	struct RespostaPesquisa *vet_resposta = NULL; 
+	if(!alocar_memoria((void**)&vet_resposta, capacidade_resposta, sizeof(struct RespostaPesquisa))){
 		return 1;
 	}
 	int op_menu, op_pessoa, op_pesquisa, op_resposta_pesquisa, op_relatorios;
