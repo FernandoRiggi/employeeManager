@@ -5,7 +5,7 @@ Employee Manager is an application developed in **C** to manage employee informa
 
 ## Technologies Used
 - **C** (Programming language)
-- **TXT File** or **SQLite Database** for storage
+- **TXT File**
 
 ## Features
 - Create new employees
